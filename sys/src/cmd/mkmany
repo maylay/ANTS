@@ -32,7 +32,8 @@ $BIN/%:	$O.%
 
 %.installall:V:
 	for (objtype in $CPUS)
-		mk $stem.install
+		if(test -e /$objtype/lib/libc.a)
+			mk $stem.install
 
 install:V:
 	for (i in $TARG)
@@ -40,7 +41,8 @@ install:V:
 
 installall:V:
 	for(objtype in $CPUS)
-		mk $MKFLAGS install
+		if(test -e /$objtype/lib/libc.a)
+			mk $MKFLAGS install
 
 %.safeinstall:V:
 	mk $O.$stem

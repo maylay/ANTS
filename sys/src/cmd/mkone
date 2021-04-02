@@ -30,7 +30,8 @@ $BIN/$TARG:	$O.out
 
 installall:V:
 	for(objtype in $CPUS)
-		mk install
+		if(test -e /$objtype/lib/libc.a)
+			mk install
 
 allall:V:
 	for(objtype in $CPUS)
