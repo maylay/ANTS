@@ -805,8 +805,7 @@ isectproc(void *v)
 		nminibuf = 1;
 	}else{
 		/* otherwise use nsection = sqrt(nmini) */
-		for(nbuf=1; nbuf*nbuf<prod; nbuf++)
-			;
+		nbuf = sqrt(prod);
 		if(nbuf*MinBufSize > isectmem)
 			sysfatal("not enough memory");
 		nminibuf = nbuf;
