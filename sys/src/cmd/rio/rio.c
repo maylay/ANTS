@@ -340,13 +340,20 @@ void
 keyboardthread(void*)
 {
 	char *s;
+	int mod4downnew;
 
 	threadsetname("keyboardthread");
 
+	mod4downnew = 0;
 	while(s = recvp(kbdchan)){
-		if(*s == 'k' || *s == 'K')
+		if(*s == 'k' || *s == 'K'){
 			shiftdown = utfrune(s+1, Kshift) != nil;
-		if(input == nil || sendp(input->ck, s) <= 0)
+			mod4downnew = utfrune(s+1, Kmod4) != nil;
+		}
+		if(mod4down || mod4downnew){
+			mod4down = mod4downnew;
+			sendp(gkbdc, s);
+		}else if(input == nil || sendp(input->ck, s) <= 0)
 			free(s);
 	}
 }

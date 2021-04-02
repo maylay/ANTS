@@ -326,11 +326,15 @@ Channel*	winclosechan;
 char		*startdir;
 int		sweeping;
 int		wctlfd;
+int		gkbdfd;
+Channel*	gkbdc;
 char		srvpipe[];
 char		srvwctl[];
+char		srvgkbd[];
 int		errorshouldabort;
 int		menuing;		/* menu action is pending; waiting for window to be indicated */
 int		snarfversion;	/* updated each time it is written */
 int		messagesize;		/* negotiated in 9P version setup */
 int		shiftdown;
+int		mod4down;
 int		debug;

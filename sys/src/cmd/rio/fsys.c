@@ -50,6 +50,7 @@ int	firstmessage = 1;
 
 char	srvpipe[64];
 char	srvwctl[64];
+char	srvgkbd[64];
 
 static	Xfid*	filsysflush(Filsys*, Xfid*, Fid*);
 static	Xfid*	filsysversion(Filsys*, Xfid*, Fid*);
@@ -115,6 +116,34 @@ cexecpipe(int *p0, int *p1)
 	return 0;
 }
 
+void
+gkbdproc(void *v)
+{
+	char *s;
+	int n, eofs;
+	Channel *c;
+
+	threadsetname("GKBDPROC");
+	c = v;
+
+	eofs = 0;
+	for(;;){
+		if((s = recvp(c)) == nil)
+			break;
+		n = write(gkbdfd, s, strlen(s));	/* room for \0 */
+		free(s);
+		if(n < 0)
+			break;
+		if(n == 0){
+			if(++eofs > 20)
+				break;
+			continue;
+		}
+		eofs = 0;
+	}
+	close(gkbdfd);
+}
+
 Filsys*
 filsysinit(Channel *cxfidalloc)
 {
@@ -142,6 +171,12 @@ filsysinit(Channel *cxfidalloc)
 	post(srvwctl, "wctl", p0);
 	close(p0);
 
+	if(cexecpipe(&p0, &gkbdfd) < 0)
+		goto Rescue;
+	snprint(srvgkbd, sizeof(srvgkbd), "/srv/riogkbd.%s.%lud", fs->user, (ulong)getpid());
+	post(srvgkbd, "gkbd", p0);
+	close(p0);
+
 	/*
 	 * Start server processes
 	 */
@@ -150,6 +185,12 @@ filsysinit(Channel *cxfidalloc)
 		error("wctl channel");
 	proccreate(wctlproc, c, 4096);
 	threadcreate(wctlthread, c, 4096);
+
+	gkbdc = chancreate(sizeof(char*), 0);
+	if(gkbdc == nil)
+		error("gkbd channel");
+	proccreate(gkbdproc, gkbdc, 4096);
+
 	proccreate(filsysproc, fs, 10000);
 
 	/*
