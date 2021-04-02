@@ -25,7 +25,8 @@ VtSrv *ventisrv;
 
 static void	ventiserver(void*);
 
-static ulong
+// This is only used to provide info to allocbypcnt, so it can return the full amount and rely on allocbypcnt to ensure values are sane
+static uvlong
 freemem(void)
 {
 	int nf, pgsize = 0;
@@ -58,18 +59,6 @@ freemem(void)
 	} else {
 		fprint(2, "%s: failed to open /dev/swap\n", argv0);
 	}
-	/* cap it to keep the size within 32 bits */
-	if (size >= 3840UL * 1024 * 1024){
-		size = 3840UL * 1024 * 1024;
-		fprint(2, "%s: Reduced free memory detected to 3840MiB because we don't support 64-bit addresses yet.\n", argv0);
-	}
-	/* FIXME: we use signed 32-bit integers in some places for some fucking reason. 
-	   Limiting accordingly for now.
-	*/
-	if (size >= 2047UL * 1024 * 1024){
-		size = 2047UL * 1024 * 1024;
-		fprint(2, "%s: Reduced free memory detected to 2047MiB because we have bugz.\n", argv0);
-	}
 	return size;
 }
 
@@ -86,12 +75,12 @@ allocminima(Allocs *all)			/* enforce minima for sanity */
 
 /* automatic memory allocations sizing per venti(8) guidelines */
 static Allocs
-allocbypcnt(u32int mempcnt, u32int stfree)
+allocbypcnt(u32int mempcnt, u64int stfree)
 {
-	u32int avail;
-	vlong blmsize;
+	u64int avail;
+	uvlong blmsize;
 	Allocs all;
-	static u32int free;
+	static u64int free;
 
 	all.mem = Unspecified;
 	all.bcmem = all.icmem = 0;
@@ -103,20 +92,28 @@ allocbypcnt(u32int mempcnt, u32int stfree)
 	blmsize = stfree - free;
 	if (blmsize <= 0)
 		blmsize = 0;
-	avail = ((vlong)stfree * mempcnt) / 100;
+	avail = (stfree * mempcnt) / 100;
 	if (blmsize >= avail || (avail -= blmsize) <= (1 + 2 + 6) * 1024 * 1024)
 		fprint(2, "%s: bloom filter bigger than mem pcnt; "
 			"resorting to minimum values (9MB total)\n", argv0);
 	else {
-		if (avail >= 2047UL * 1024 * 1024){
-			avail = 2047UL * 1024 * 1024;	/* sanity */
-			fprint(2, "%s: restricting memory usage to 2047MiB\n", argv0);
-		}
 		avail /= 2;
 		all.icmem = avail;
+		if (all.icmem >= 4096ULL * 1024 * 1024){
+			all.icmem = 4ULL * 1024 * 1024 * 1024;
+			fprint(2, "%s: restricting icache to 4GiB\n", argv0);
+		}
 		avail /= 3;
 		all.mem = avail;
+		if (all.mem >= 4ULL * 1024 * 1024 * 1024){
+			all.mem = 4ULL * 1024 * 1024 * 1024;
+			fprint(2, "%s: restricting lumpcache to 4GiB\n", argv0);
+		}
 		all.bcmem = 2 * avail;
+		if (all.bcmem >= 2ULL * 1024 * 1024 * 1024){
+			all.bcmem = 2ULL * 1024 * 1024 * 1024;
+			fprint(2, "%s: restricting block cache to 2GiB\n", argv0);
+		}
 	}
 	return all;
 }
