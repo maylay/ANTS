@@ -2,7 +2,7 @@
 
 rfork en
 
-PROMPT='[^ 	]*(%|;)[ 	]+'
+PROMPT='[^ 	]*(%|#|;)[ 	]+'
 
 fn cmds {
 	grep '^'$PROMPT'[^"]' /dev/text | sed 's/^/	/'
