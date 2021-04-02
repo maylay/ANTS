@@ -876,17 +876,17 @@ iconinit(void)
 	Image *tmp;
 
 	/* Blue */
-	tagcols[BACK] = allocimagemix(display, DPalebluegreen, DWhite);
+	tagcols[BACK] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPalegreygreen);
 	tagcols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPalegreygreen);
 	tagcols[BORD] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPurpleblue);
 	tagcols[TEXT] = display->black;
 	tagcols[HTEXT] = display->black;
 
 	/* Yellow */
-	textcols[BACK] = allocimagemix(display, DPaleyellow, DWhite);
+	textcols[BACK] = display->black;;
 	textcols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DDarkyellow);
 	textcols[BORD] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DYellowgreen);
-	textcols[TEXT] = display->black;
+	textcols[TEXT] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPaleyellow);
 	textcols[HTEXT] = display->black;
 
 	if(button){
