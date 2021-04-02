@@ -2,17 +2,9 @@
 #include <libc.h>
 #include <venti.h>
 
-enum {
-	IdealAlignment = 32,
-	ChunkSize 	= 128*1024
-};
-
-
 void
 vtfree(void *p)
 {
-	if(p == 0)
-		return;
 	free(p);
 }
 
@@ -52,38 +44,11 @@ vtrealloc(void *p, ulong size)
 void *
 vtbrk(ulong n)
 {
-	static Lock lk;
-	static uchar *buf;
-	static int nbuf, nchunk;
-	int align, pad;
 	void *p;
-
-	if(n >= IdealAlignment)
-		align = IdealAlignment;
-	else if(n > 8)
-		align = 8;
-	else	
-		align = 4;
-
-	lock(&lk);
-	pad = (align - (uintptr)buf) & (align-1);
-	if(n + pad > nbuf) {
-		buf = sbrk(ChunkSize);
-		memset(buf, 0, ChunkSize);
-		if(buf == (void*)-1)
-			sysfatal("sbrk failed and venti's memory allocation is shit");
-		nbuf = ChunkSize;
-		pad = (align - (uintptr)buf) & (align-1);
-		nchunk++;
-	}
-
-	assert(n + pad <= nbuf);	
-	
-	p = buf + pad;
-	buf += pad + n;
-	nbuf -= pad + n;
-	unlock(&lk);
-
+	p = sbrk(n);
+	if(p == (void*)-1)
+		sysfatal("sbrk failed and venti's memory allocation is shit");
+	memset(p, 0, n);
 	return p;
 }
 
