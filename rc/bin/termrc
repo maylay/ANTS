@@ -1,6 +1,6 @@
 #!/bin/rc
 # this file is run if service=terminal
-TIMESYNCARGS=(-rLa1000000)
+TIMESYNCARGS=(-fa1000000)
 
 # parallelism for mk
 NPROC=`{wc -l </dev/sysstat}
