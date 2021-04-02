@@ -56,7 +56,7 @@ mkihash(int size1)
 		size <<= 1;
 	}
 	
-	ih = vtmallocz(sizeof(IHash)+size*sizeof(ih->table[0]));
+	ih = vtbrk(sizeof(IHash)+size*sizeof(ih->table[0]));
 	ih->table = (IEntry**)(ih+1);
 	ih->bits = bits;
 	ih->size = size;
@@ -304,7 +304,7 @@ fprint(2, "icache %,d bytes = %,d entries; %d scache\n", mem0, entries, scache);
 	icache.hash = mkihash(entries);
 	icache.nentries = entries;
 	setstat(StatIcacheSize, entries);
-	icache.entries = vtmallocz(entries*sizeof icache.entries[0]);
+	icache.entries = vtbrk(entries*sizeof icache.entries[0]);
 	icache.maxdirty = entries / 2;
 	for(i=0; i<entries; i++)
 		pushfirst(&icache.free, &icache.entries[i]);
