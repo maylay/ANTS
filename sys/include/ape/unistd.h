@@ -124,6 +124,7 @@ extern int chdir(const char *);
 extern int chroot(const char *);
 extern int link(const char *, const char *);
 extern char *getcwd(char *, size_t);
+extern char *get_current_dir_name();
 extern int unlink(const char *);
 extern int rmdir(const char *);
 extern int rename(const char *, const char *);
