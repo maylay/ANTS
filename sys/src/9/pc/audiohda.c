@@ -97,8 +97,8 @@ enum {
 };
 
 enum {
-	Bufsize = 64 * 1024 * 4,
-	Nblocks = 256,
+	Bufsize = 1024 * 1024 * 4,
+	Nblocks = 4096,
 	Blocksize = Bufsize / Nblocks,
 	BytesPerSample = 4,
 
