@@ -14,7 +14,7 @@ struct Graph
 {
 	int		colindex;
 	Rectangle	r;
-	int		*data;
+	uvlong		*data;
 	int		ndata;
 	char		*label;
 	void		(*newvalue)(Machine*, uvlong*, uvlong*, int);
@@ -389,7 +389,6 @@ drawdatum(Graph *g, int x, uvlong prev, uvlong v, uvlong vmax)
 {
 	int c;
 	Point p, q;
-
 	c = g->colindex;
 	p = datapoint(g, x, v, vmax);
 	q = datapoint(g, x, prev, vmax);
@@ -480,10 +479,10 @@ readswap(Machine *m, uvlong *a)
 		if(!readnums(m, 7, a, 1))
 			return 0;
 
-		a[Mem] = a[3];
-		a[Maxmem] = a[4];
-		a[Swap] = a[5];
-		a[Maxswap] = a[6];
+		a[Mem] = a[3] * a[1];
+		a[Maxmem] = a[4] * a[1];
+		a[Swap] = a[5] * a[1];
+		a[Maxswap] = a[6] * a[1];
 
 		a[Reclaim] = 0;
 		a[Maxreclaim] = 0;
@@ -551,11 +550,39 @@ ilog10(uvlong j)
 }
 
 int
+execrimport(char *name, char *root, char *mpt, int append)
+{
+		Waitmsg *w;
+		int pid;
+
+		pid = fork();
+		switch(pid){
+		case -1:
+			fprint(2, "can't fork: %r\n");
+			return 0;
+		case 0:
+			if(append)
+				execl("/bin/rimport", "rimport", "-a", name, root, mpt, nil);
+			else
+				execl("/bin/rimport", "rimport", name, root, mpt, nil);
+			fprint(2, "can't exec: %r\n");
+			exits("exec");
+		}
+		w = wait();
+		if(w == nil || w->pid != pid || w->msg[0] != '\0'){
+			free(w);
+			return 0;
+		}
+		free(w);
+		return 1;
+}
+
+int
 initmach(Machine *m, char *name)
 {
 	int n;
 	uvlong a[MAXNUM];
-	char *p, mpt[256], buf[256];
+	char *p, mpt[256], mptdev[256], buf[256];
 
 	p = strchr(name, '!');
 	if(p)
@@ -568,27 +595,13 @@ initmach(Machine *m, char *name)
 	if(m->remote == 0)
 		strcpy(mpt, "");
 	else{
-		Waitmsg *w;
-		int pid;
-
 		snprint(mpt, sizeof mpt, "/n/%s", p);
+		snprint(mptdev,  sizeof mptdev, "%s/dev", mpt);
 
-		pid = fork();
-		switch(pid){
-		case -1:
-			fprint(2, "can't fork: %r\n");
+		if(execrimport(name, "/", mpt, 0) != 1)
 			return 0;
-		case 0:
-			execl("/bin/rimport", "rimport", name, "/", mpt, nil);
-			fprint(2, "can't exec: %r\n");
-			exits("exec");
-		}
-		w = wait();
-		if(w == nil || w->pid != pid || w->msg[0] != '\0'){
-			free(w);
+		if(execrimport(name, "#P", mptdev, 1) != 1)
 			return 0;
-		}
-		free(w);
 	}
 
 	snprint(buf, sizeof buf, "%s/dev/swap", mpt);
@@ -1061,8 +1074,11 @@ addmachine(char *name)
 void
 labelstrs(Graph *g, char strs[Nlab][Lablen], int *np)
 {
-	int j;
+	int j, valint;
+	unsigned suffix;
+	double val;
 	uvlong v, vmax;
+	const char suffixes[5] = { 0, 'K', 'M', 'G', 'T' };
 
 	g->newvalue(g->mach, &v, &vmax, 1);
 	if(vmax == 0)
@@ -1072,8 +1088,21 @@ labelstrs(Graph *g, char strs[Nlab][Lablen], int *np)
 			sprint(strs[j-1], "%g", scale*pow(10., j)*(double)vmax/100.);
 		*np = 2;
 	}else{
-		for(j=1; j<=3; j++)
-			sprint(strs[j-1], "%g", scale*(double)j*(double)vmax/4.0);
+		for(j=1; j<=3; j++){
+			suffix = 0;
+			val = scale * (double)j * (double)vmax / 4.0;
+			if(g->newvalue == memval || g->newvalue == swapval){
+				while(val > 1024 && (suffix + 1) != sizeof suffixes){
+					val /= 1024;
+					suffix += 1;
+				}
+				valint = (int)val;
+				if (val - valint > 0.5)
+					valint += 1;
+				val = valint;
+			}
+			sprint(strs[j-1], "%g%c", val, suffixes[suffix]);
+		}
 		*np = 3;
 	}
 }
@@ -1177,9 +1206,9 @@ resize(void)
 			/* allocate data */
 			ondata = g->ndata;
 			g->ndata = Dx(machr)+1;	/* may be too many if label will be drawn here; so what? */
-			g->data = erealloc(g->data, g->ndata*sizeof(ulong));
+			g->data = erealloc(g->data, g->ndata*sizeof(uvlong));
 			if(g->ndata > ondata)
-				memset(g->data+ondata, 0, (g->ndata-ondata)*sizeof(ulong));
+				memset(g->data+ondata, 0, (g->ndata-ondata)*sizeof(uvlong));
 			/* set geometry */
 			g->r = machr;
 			g->r.min.y = y;
