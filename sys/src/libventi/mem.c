@@ -69,6 +69,7 @@ vtbrk(ulong n)
 	pad = (align - (uintptr)buf) & (align-1);
 	if(n + pad > nbuf) {
 		buf = sbrk(ChunkSize);
+		memset(buf, 0, ChunkSize);
 		if(buf == (void*)-1)
 			sysfatal("sbrk failed and venti's memory allocation is shit");
 		nbuf = ChunkSize;
