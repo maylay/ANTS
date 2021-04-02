@@ -30,7 +30,7 @@ BIN=/$objtype/bin/games
 
 DIRS=\
 	2600\
-	blabs\
+#	blabs\
 	blit\
 	c64\
 	doom\
