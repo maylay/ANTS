@@ -11,10 +11,10 @@
 
 typedef struct Allocs Allocs;
 struct Allocs {
-	u32int	mem;
-	u32int	bcmem;
-	u32int	icmem;
-	u32int	stfree;				/* free memory at start */
+	u64int	mem;
+	u64int	bcmem;
+	u64int	icmem;
+	u64int	stfree;				/* free memory at start */
 	uint	mempcnt;
 };
 
@@ -172,7 +172,7 @@ void
 threadmain(int argc, char *argv[])
 {
 	char *configfile, *haddr, *vaddr, *webroot;
-	u32int mem, icmem, bcmem, minbcmem, mempcnt, stfree;
+	u64int mem, icmem, bcmem, minbcmem, mempcnt, stfree;
 	Allocs allocs;
 	Config config;
 
@@ -278,7 +278,7 @@ threadmain(int argc, char *argv[])
 	mem = allocs.mem;
 	bcmem = allocs.bcmem;
 	icmem = allocs.icmem;
-	fprint(2, "%s: mem %,ud bcmem %,ud icmem %,ud...",
+	fprint(2, "%s: mem %,llud bcmem %,llud icmem %,llud...",
 		argv0, mem, bcmem, icmem);
 
 	/*
@@ -305,7 +305,7 @@ threadmain(int argc, char *argv[])
 	/*
 	 * lump cache
 	 */
-	if(0) fprint(2, "initialize %d bytes of lump cache for %d lumps\n",
+	fprint(2, "initialize %,llud bytes of lump cache for %llud lumps\n",
 		mem, mem / (8 * 1024));
 	initlumpcache(mem, mem / (8 * 1024));
 
@@ -322,7 +322,7 @@ threadmain(int argc, char *argv[])
 		(mainindex->narenas + mainindex->nsects*4 + 16);
 	if(bcmem < minbcmem)
 		bcmem = minbcmem;
-	if(0) fprint(2, "initialize %d bytes of disk block cache\n", bcmem);
+	fprint(2, "initialize %,llud bytes of disk block cache\n", bcmem);
 	initdcache(bcmem);
 
 	if(mainindex->bloom)

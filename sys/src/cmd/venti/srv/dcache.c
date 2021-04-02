@@ -75,12 +75,15 @@ static void	flushproc(void*);
 static void	writeproc(void*);
 
 void
-initdcache(u32int mem)
+initdcache(u64int mem)
 {
 	DBlock *b, *last;
-	u32int nblocks, blocksize;
+	u64int nblocks, blocksize;
 	int i;
 	u8int *p;
+	
+	if(mem >= (u64int)1024*1024*1024*4)
+		fprint(2, "WARNING: caches of 64-bit sizes are highly experimental. Don't complain if your data is destroyed.");
 
 	if(mem < maxblocksize * 2)
 		sysfatal("need at least %d bytes for the disk cache", maxblocksize * 2);

@@ -43,7 +43,7 @@ struct IHash
 };
 
 static IHash*
-mkihash(int size1)
+mkihash(u32int size1)
 {
 	u32int size;
 	int bits;
@@ -278,14 +278,17 @@ scachemiss(u64int addr)
  */
 
 void
-initicache(u32int mem0)
+initicache(u64int mem0)
 {
-	u32int mem;
-	int i, entries, scache;
+	u64int mem;
+	u32int entries;
+	int i, scache;
 	
 	icache.full.l = &icache.lock;
 
 	mem = mem0;
+	if(mem / (sizeof(IEntry)+sizeof(IEntry*)) >= (u64int)4*1024*1024*1024)
+		sysfatal("TODO: get IHash working with 64-bit sizes. For now, lower icache size.");
 	entries = mem / (sizeof(IEntry)+sizeof(IEntry*));
 	scache = (entries/8) / ArenaCIGSize;
 	entries -= entries/8;
@@ -295,7 +298,7 @@ initicache(u32int mem0)
 		scache = 16;
 	if(entries < 1000)
 		entries = 1000;
-fprint(2, "icache %,d bytes = %,d entries; %d scache\n", mem0, entries, scache);
+fprint(2, "icache %,llud bytes = %,ud entries; %d scache\n", mem0, entries, scache);
 
 	icache.clean.prev = icache.clean.next = &icache.clean;
 	icache.dirty.prev = icache.dirty.next = &icache.dirty;

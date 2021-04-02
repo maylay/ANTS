@@ -175,9 +175,9 @@ struct Config
 	int		nsects;			/* index sections initialized */
 	ISect		**sects;
 	Bloom	*bloom;		/* bloom filter */
-	u32int	bcmem;
-	u32int	mem;
-	u32int	icmem;
+	u64int	bcmem;
+	u64int	mem;
+	u64int	icmem;
 	int		queuewrites;
 	char*	haddr;
 	char*	vaddr;
