@@ -175,7 +175,20 @@ Cursor *corners[9] = {
 void
 iconinit(void)
 {
-	background = allocimage(display, Rect(0,0,1,1), RGB24, 1, 0x777777FF);
+	int fd;
+	Image *bimg = nil;
+	fd = open("/usr/glenda/lib/wallpaper", OREAD);
+	if(fd >= 0){
+		bimg = readimage(display, fd, 0);
+		close(fd);
+	}
+	if (bimg){
+		background = bimg;
+	}
+	else {
+		fprint(2, "iconinit: %r\n");
+		background = allocimage(display, Rect(0,0,1,1), RGB24, 1, 0x10E0BBFF);
+	}
 
 	/* greys are multiples of 0x11111100+0xFF, 14* being palest */
 	cols[BACK] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, 0xFFFFFFFF^reverse);
