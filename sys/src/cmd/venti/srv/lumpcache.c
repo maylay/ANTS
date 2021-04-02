@@ -48,8 +48,8 @@ initlumpcache(u32int size, u32int nblocks)
 	lumpcache.allowed = size;
 	lumpcache.avail = size;
 	lumpcache.heads = MKNZ(Lump*, HashSize);
-	lumpcache.heap = MKNZ(Lump*, nblocks);
-	lumpcache.blocks = MKNZ(Lump, nblocks);
+	lumpcache.heap = vtbrk(nblocks * sizeof(Lump*));
+	lumpcache.blocks = vtbrk(nblocks * sizeof(Lump));
 	setstat(StatLcacheSize, lumpcache.nblocks);
 
 	last = nil;
