@@ -98,7 +98,9 @@ initdcache(u32int mem)
 	dcache.heap = MKNZ(DBlock*, nblocks);
 	dcache.blocks = MKNZ(DBlock, nblocks);
 	dcache.write = MKNZ(DBlock*, nblocks);
-	dcache.mem = MKNZ(u8int, (nblocks+1+128) * blocksize);
+	dcache.mem = vtbrk((nblocks+1+128) * blocksize);
+	if(dcache.mem == nil)
+		sysfatal("Failed to allocate dcache memory!");
 
 	last = nil;
 	p = (u8int*)(((uintptr)dcache.mem+blocksize-1)&~(uintptr)(blocksize-1));
