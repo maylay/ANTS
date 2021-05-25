@@ -150,6 +150,7 @@ int needkeyqueue(Req*, Fsstate*);
 extern	int		askforkeys;
 extern	char		*authaddr[8];	/* bootstrap auth servers */
 extern	int		*confirminuse;
+extern	int		nomntcs;
 extern	int		debug;
 extern	int		gflag;
 extern	int		kflag;

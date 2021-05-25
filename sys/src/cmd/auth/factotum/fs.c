@@ -12,6 +12,7 @@ Keyring	*ring;
 char		*service;
 int		sflag;
 int		uflag;
+int		nomntcs;
 
 extern Srv		fs;
 static void		notifyf(void*, char*);
@@ -104,6 +105,8 @@ main(int argc, char **argv)
 	case 'u':		/* user: set hostowner */
 		uflag = 1;
 		break;
+	case 'x':
+		nomntcs = 1;
 	default:
 		usage();
 	}ARGEND

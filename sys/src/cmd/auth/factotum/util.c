@@ -11,6 +11,8 @@ bindnetcs(void)
 
 	if(access("/net/tcp", AEXIST) < 0)
 		bind("#I", "/net", MBEFORE);
+	if(nomntcs)
+		return -1;
 
 	if(access("/net/cs", AEXIST) < 0){
 		if((srvfd = open("#s/cs", ORDWR)) >= 0){
