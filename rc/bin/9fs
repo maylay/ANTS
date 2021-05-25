@@ -28,7 +28,12 @@ case 9fat esp pidos dos
 		unmount /n/9 >/dev/null >[2]/dev/null
 		mount -c /srv/dos /n/9 $part
 	}
-case dump other
+case dump
+	if (test -e /srv/fscons)
+		mount /srv/boot /n/dump main/archive
+	if not
+		mount -C /srv/boot /n/$1 $1
+case other
 	mount -C /srv/boot /n/$1 $1
 case sources
 	srv -nqC tcp!sources.cs.bell-labs.com sources /n/sources
