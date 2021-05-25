@@ -64,6 +64,7 @@ mkdir -p amd64/bin/aux
 mkdir -p amd64/bin/bitsy
 mkdir -p amd64/bin/dial
 mkdir -p amd64/bin/disk
+mkdir -p amd64/bin/fossil
 mkdir -p amd64/bin/fs
 mkdir -p amd64/bin/games
 mkdir -p amd64/bin/ip/httpd
@@ -97,6 +98,7 @@ mkdir -p arm64/bin/bitsy
 mkdir -p arm64/bin/dial
 mkdir -p arm64/bin/disk
 mkdir -p arm64/bin/fs
+mkdir -p arm64/bin/fossil
 mkdir -p arm64/bin/games
 mkdir -p arm64/bin/ip/httpd
 mkdir -p arm64/bin/ndb
