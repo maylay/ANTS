@@ -1,0 +1,19 @@
+***************
+*** 361,366 ****
+  	else
+  		retval = 1;
+  
+  	if(tsync){
+  		/*
+  		 * All values were defaulted,
+--- 361,370 ----
+  	else
+  		retval = 1;
+  
++ 	fid->qid.vers = fileGetMcount(fid->file);
++ 	m->r.qid = fid->qid;
++ 	m->r.iounit = m->con->msize-IOHDRSZ;
++ 
+  	if(tsync){
+  		/*
+  		 * All values were defaulted,
