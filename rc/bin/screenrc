@@ -35,9 +35,11 @@ if(test -f /dev/vgactl || bind -a '#v' /dev >[2] /dev/null){
 	}
 }
 
+echo Binding /dev/draw...
 if(! test -d /dev/draw)
 	bind -a '#i' /dev
 
+echo Binding /dev/mouse...
 if(! test -f /dev/mouse)
 	bind -a '#m' /dev
 
@@ -52,3 +54,5 @@ if(test -f /dev/mousectl && test -f /dev/winname){
 }
 
 rm -f '/env/fn#ask'
+
+echo Screen initialized.
