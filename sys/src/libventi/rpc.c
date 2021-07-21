@@ -34,7 +34,7 @@ Packet*
 _vtrpc(VtConn *z, Packet *p, VtFcall *tx)
 {
 	int i;
-	uchar tag, buf[2], *top;
+	uchar tag, buf[2];
 	Rwait *r, *rr;
 
  
@@ -58,18 +58,12 @@ _vtrpc(VtConn *z, Packet *p, VtFcall *tx)
 	}
 
 	/* slam tag into packet */
-	top = packetpeek(p, buf, 0, 2);
-	if(top == nil){
+	if(packetconsume(p, buf, 2) != 0){
 		packetfree(p);
 		return nil;
 	}
-	if(top == buf){
-		werrstr("first two bytes must be in same packet fragment");
-		packetfree(p);
-		vtfree(r);
-		return nil;
-	}
-	top[1] = tag;
+	buf[1] = tag;
+	packetprefix(p, buf, 2);
 	qunlock(&z->lk);
 	if(vtsend(z, p) < 0){
 		vtfree(r);
@@ -156,16 +150,16 @@ puttag(VtConn *z, Rwait *r, int tag)
 static void
 muxrpc(VtConn *z, Packet *p)
 {
-	uchar tag, buf[2], *top;
+	uchar tag, buf[2];
 	Rwait *r;
 
-	if((top = packetpeek(p, buf, 0, 2)) == nil){
+	if(packetcopy(p, buf, 0, 2) != 0){
 		fprint(2, "libventi: short packet in vtrpc\n");
 		packetfree(p);
 		return;
 	}
 
-	tag = top[1];
+	tag = buf[1];
 	if((r = z->wait[tag]) == nil){
 		fprint(2, "libventi: unexpected packet tag %d in vtrpc\n", tag);
 abort();

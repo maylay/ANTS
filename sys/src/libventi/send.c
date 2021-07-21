@@ -62,7 +62,7 @@ interrupted(void)
 static Packet*
 _vtrecv(VtConn *z)
 {
-	uchar buf[10], *b;
+	uchar buf[MaxFragSize];
 	int n;
 	Packet *p;
 	int size, len;
@@ -76,15 +76,14 @@ _vtrecv(VtConn *z)
 	/* get enough for head size */
 	size = packetsize(p);
 	while(size < 2) {
-		b = packettrailer(p, 2);
-		assert(b != nil);
 		if(0) fprint(2, "%d read hdr\n", getpid());
-		n = read(z->infd, b, 2);
+		memset(buf, 0, 2);
+		n = read(z->infd, buf, 2);
 		if(0) fprint(2, "%d got %d (%r)\n", getpid(), n);
 		if(n==0 || (n<0 && !interrupted()))
 			goto Err;
 		size += n;
-		packettrim(p, 0, size);
+		packetappend(p, buf, n);
 	}
 
 	if(packetconsume(p, buf, 2) < 0)
@@ -96,15 +95,15 @@ _vtrecv(VtConn *z)
 		n = len - size;
 		if(n > MaxFragSize)
 			n = MaxFragSize;
-		b = packettrailer(p, n);
 		if(0) fprint(2, "%d read body %d\n", getpid(), n);
-		n = read(z->infd, b, n);
+		n = read(z->infd, buf, n);
 		if(0) fprint(2, "%d got %d (%r)\n", getpid(), n);
 		if(n > 0)
 			size += n;
-		packettrim(p, 0, size);
 		if(n==0 || (n<0 && !interrupted()))
 			goto Err;
+		packetappend(p, buf, n);
+		packettrim(p, 0, size);
 	}
 	ventirecvbytes += len;
 	ventirecvpackets++;
