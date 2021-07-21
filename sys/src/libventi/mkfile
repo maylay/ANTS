@@ -16,7 +16,7 @@ OFILES=\
 	hangup.$O\
 	log.$O\
 	mem.$O\
-	packet.$O\
+	debugpacket.$O\
 	parsescore.$O\
 	queue.$O\
 	root.$O\
