@@ -797,6 +797,10 @@ Forward:
 					r = (r << 4) | (10 + (rr - 'a'));
 				else if(rr >= 'A' && rr <= 'F')
 					r = (r << 4) | (10 + (rr - 'A'));
+				else if(rr == '\b'){
+					r = r >> 4;
+					i += 2;
+				}
 				else
 					break;
 			} while(--i > 0);
